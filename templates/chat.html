@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthChat Pro - Medical AI Assistant</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container-fluid h-100">
+        <div class="row justify-content-center h-100">
+            <div class="col-12 col-lg-10 col-xl-8 chat">
+                <div class="card chat-card">
+                    <!-- Header -->
+                    <div class="card-header msg_head">
+                        <div class="d-flex bd-highlight align-items-center">
+                            <div class="user_info flex-grow-1">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ url_for('static', filename='logo.svg') }}" class="brand-logo" alt="HealthChat Pro">
+                                </div>
+                            </div>
+                            <div class="header-actions">
+                                <button class="btn btn-link text-white" onclick="clearChat()" title="Clear Chat">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="messageContainer" class="card-body msg_card_body">
+                        <div class="welcome-message">
+                            <div class="d-flex justify-content-start mb-4">
+                                <div class="img_cont_msg">
+                                    <img src="{{ url_for('static', filename='bot-avatar.svg') }}" class="rounded-circle user_img_msg" alt="Bot">
+                                </div>
+                                <div class="msg_cotainer welcome-msg">
+                                    <div class="welcome-content">
+                                        <h5><i class="fas fa-stethoscope"></i> Welcome to HealthChat Pro</h5>
+                                        <p>I'm your AI medical assistant. I can help you with:</p>
+                                        <ul>
+                                            <li>Medical information and explanations</li>
+                                            <li>Symptom analysis and guidance</li>
+                                            <li>Treatment options and recommendations</li>
+                                            <li>Health and wellness advice</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div id="typingIndicator" class="typing-indicator" style="display: none;">
+                        <div class="d-flex justify-content-start mb-2">
+                            <div class="img_cont_msg">
+                                <img src="{{ url_for('static', filename='bot-avatar.svg') }}" class="rounded-circle user_img_msg" alt="Bot">
+                            </div>
+                            <div class="msg_cotainer typing-msg">
+                                <div class="typing-animation">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <span class="typing-text">HealthChat Pro is thinking...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="card-footer">
+                        <form id="messageArea" class="input-group">
+                            <div class="input-group-prepend">
+                                <button type="button" class="btn attach_btn" title="Attach File">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                            </div>
+                            <input type="text" id="text" name="msg" placeholder="Ask me anything about health and medicine..." autocomplete="off" class="form-control type_msg" required/>
+                            <div class="input-group-append">
+                                <button type="submit" id="send" class="btn send_btn" title="Send Message">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    
+    <script>
+        let conversationHistory = [];
+        
+        $(document).ready(function() {
+            // Auto-scroll to bottom
+            function scrollToBottom() {
+                const container = $('#messageContainer');
+                container.animate({ scrollTop: container[0].scrollHeight }, 300);
+            }
+
+            // Clear chat function
+            window.clearChat = function() {
+                // Clear chat on server
+                $.ajax({
+                    type: "POST",
+                    url: "/clear_chat",
+                    success: function() {
+                        $('#messageContainer').html(`
+                            <div class="welcome-message">
+                                <div class="d-flex justify-content-start mb-4">
+                                    <div class="img_cont_msg">
+                                        <img src="{{ url_for('static', filename='bot-avatar.svg') }}" class="rounded-circle user_img_msg" alt="Bot">
+                                    </div>
+                                    <div class="msg_cotainer welcome-msg">
+                                        <div class="welcome-content">
+                                            <h5><i class="fas fa-stethoscope"></i> Welcome to HealthChat Pro</h5>
+                                            <p>I'm your AI medical assistant. I can help you with:</p>
+                                            <ul>
+                                                <li>Medical information and explanations</li>
+                                                <li>Symptom analysis and guidance</li>
+                                                <li>Treatment options and recommendations</li>
+                                                <li>Health and wellness advice</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                        conversationHistory = [];
+                    }
+                });
+            };
+
+            // Typewriter effect for bot responses
+            function typeWriter(element, text, speed = 30) {
+                let i = 0;
+                element.html('');
+                
+                function type() {
+                    if (i < text.length) {
+                        element.html(element.html() + text.charAt(i));
+                        i++;
+                        setTimeout(type, speed);
+                    }
+                }
+                type();
+            }
+
+            // Format message with citations
+            function formatMessageWithCitations(message, sources = []) {
+                // Return only the message content without appending citations
+                return message;
+            }
+            
+            // Create separate function for formatting citations
+            function formatCitations(sources = []) {
+                let citationHtml = '';
+                
+                // Add sources if available
+                if (sources && sources.length > 0) {
+                    citationHtml = '<div class="message-sources mt-3">';
+                    citationHtml += '<p class="citation-text">Citation (Source) - ';
+                    
+                    // Combine all sources into a single citation line
+                    let citationText = sources.map(source => {
+                        return `From ${source.source} - ${source.content.split('\n')[0]} ${source.page !== 'N/A' ? '(Page ' + source.page + ')' : ''}`;
+                    }).join(' ');
+                    
+                    citationHtml += citationText + '</p>';
+                    citationHtml += '</div>';
+                } else {
+                    citationHtml = '<div class="message-sources mt-2"><p class="citation-text">Source: Medical Knowledge Base</p></div>';
+                }
+                
+                return citationHtml;
+            }
+
+            // Handle form submission
+            $("#messageArea").on("submit", function(event) {
+                event.preventDefault();
+                
+                const date = new Date();
+                const hour = date.getHours().toString().padStart(2, '0');
+                const minute = date.getMinutes().toString().padStart(2, '0');
+                const str_time = hour + ":" + minute;
+                const rawText = $("#text").val().trim();
+                
+                if (!rawText) return;
+
+                // Add user message
+                const userHtml = `
+                    <div class="d-flex justify-content-end mb-4 message-fade-in">
+                        <div class="msg_cotainer_send">
+                            ${rawText}
+                            <span class="msg_time_send">${str_time}</span>
+                        </div>
+                        <div class="img_cont_msg">
+                            <img src="{{ url_for('static', filename='user-avatar.svg') }}" class="rounded-circle user_img_msg" alt="User">
+                        </div>
+                    </div>
+                `;
+                
+                $("#text").val("");
+                $("#messageContainer").append(userHtml);
+                
+                // Show typing indicator
+                $("#typingIndicator").show();
+                scrollToBottom();
+
+                // Add to conversation history
+                conversationHistory.push({role: 'user', content: rawText});
+
+                // Send AJAX request
+                $.ajax({
+                    data: {
+                        msg: rawText
+                    },
+                    type: "POST",
+                    url: "/get",
+                    timeout: 30000
+                }).done(function(response) {
+                    // Hide typing indicator
+                    $("#typingIndicator").hide();
+                    
+                    // Handle both string and JSON responses
+                    let data, sources = [];
+                    if (typeof response === 'string') {
+                        try {
+                            const parsed = JSON.parse(response);
+                            data = parsed.answer;
+                            sources = parsed.sources || [];
+                        } catch (e) {
+                            data = response;
+                        }
+                    } else {
+                        data = response.answer;
+                        sources = response.sources || [];
+                    }
+                    
+                    // Create bot message container
+                    const botMessageId = 'bot-msg-' + Date.now();
+                    const citationId = 'citation-' + Date.now();
+                    const botHtml = `
+                        <div class="d-flex justify-content-start mb-4 message-fade-in">
+                            <div class="img_cont_msg">
+                                <img src="{{ url_for('static', filename='bot-avatar.svg') }}" class="rounded-circle user_img_msg" alt="Bot">
+                            </div>
+                            <div class="msg_cotainer">
+                                <div id="${botMessageId}" class="bot-response"></div>
+                                <div id="${citationId}" class="citation-container"></div>
+                                <span class="msg_time">${str_time}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    $("#messageContainer").append(botHtml);
+                    
+                    // Format and display response with typewriter effect (only the answer part)
+                    const formattedResponse = formatMessageWithCitations(data);
+                    typeWriter($(`#${botMessageId}`), formattedResponse, 20);
+                    
+                    // Add citations separately (no typewriter effect)
+                    const citationHtml = formatCitations(sources);
+                    $(`#${citationId}`).html(citationHtml);
+                    
+                    // Add to conversation history
+                    conversationHistory.push({role: 'assistant', content: data});
+                    
+                    scrollToBottom();
+                }).fail(function(xhr, status, error) {
+                    // Hide typing indicator
+                    $("#typingIndicator").hide();
+                    
+                    const errorHtml = `
+                        <div class="d-flex justify-content-start mb-4 message-fade-in">
+                            <div class="img_cont_msg">
+                                <img src="{{ url_for('static', filename='bot-avatar.svg') }}" class="rounded-circle user_img_msg" alt="Bot">
+                            </div>
+                            <div class="msg_cotainer error-msg">
+                                <i class="fas fa-exclamation-triangle"></i> Sorry, I'm experiencing technical difficulties. Please try again.
+                                <span class="msg_time">${str_time}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    $("#messageContainer").append(errorHtml);
+                    scrollToBottom();
+                });
+            });
+
+            // Enter key handling
+            $("#text").keypress(function(e) {
+                if (e.which == 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    $("#messageArea").submit();
+                }
+            });
+
+            // Initial scroll
+            scrollToBottom();
+        });
+    </script>
+</body>
+</html>
