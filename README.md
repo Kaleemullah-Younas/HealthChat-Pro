@@ -56,7 +56,6 @@ HealthChat Pro is an AI-powered medical assistant application that uses large la
 ├── templates/              # HTML templates
 │   └── chat.html          # Main chat interface
 ├── .env                    # Environment variables (API keys)
-├── .env.example           # Example environment variables file
 ├── .github/               # GitHub configuration
 │   └── workflows/         # GitHub Actions workflows
 │       └── deploy.yml     # AWS deployment workflow
@@ -124,96 +123,13 @@ python app.py
 ```
 
 7. Open your browser and navigate to `http://localhost:8080`
-```
 
-## 🌐 Usage
-
-After installation and setup:
-
-1. The application will be running at `http://localhost:8080`
-2. Enter your health-related questions in the chat interface
-3. The AI will respond with relevant medical information
-4. You can clear the chat history using the "Clear Chat" button
-
-## ☁️ AWS Deployment
-
-This project includes CI/CD setup for AWS deployment using GitHub Actions.
-
-### Prerequisites
-
-1. AWS Account
-2. GitHub Account
-3. Docker installed locally (for testing)
-
-### AWS Setup
-
-#### 1. Create IAM User
-
-Create an IAM user with the following policies:
-- `AmazonEC2ContainerRegistryFullAccess`
-- `AmazonEC2FullAccess`
-
-Save the access key and secret key for later use.
-
-#### 2. Create ECR Repository
-
-1. Go to AWS ECR console
-2. Create a new repository named `healthchat-pro`
-3. Note the repository URI (e.g., `315865595366.dkr.ecr.us-east-1.amazonaws.com/healthchat-pro`)
-
-#### 3. Set Up EC2 Instance
-
-1. Launch an EC2 instance (Ubuntu recommended)
-2. Connect to your instance via SSH
-3. Install Docker:
-
-```bash
-sudo apt-get update -y
-sudo apt-get upgrade -y
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker ubuntu
-newgrp docker
-```
-
-#### 4. Configure GitHub Actions
-
-1. In your GitHub repository, go to Settings > Actions > Runners
-2. Click "New self-hosted runner"
-3. Select Linux as the operating system
-4. Follow the instructions to set up the runner on your EC2 instance
-
-#### 5. Add GitHub Secrets
-
-In your GitHub repository, go to Settings > Secrets and add the following secrets:
-
-- `AWS_ACCESS_KEY_ID`: Your IAM user access key
-- `AWS_SECRET_ACCESS_KEY`: Your IAM user secret key
-- `AWS_DEFAULT_REGION`: Your AWS region (e.g., `us-east-1`)
-- `ECR_REPO`: Your ECR repository name (e.g., `healthchat-pro`)
-- `PINECONE_API_KEY`: Your Pinecone API key
-- `OPENAI_API_KEY`: Your OpenAI API key
-
-### Deployment Process
-
-1. Push your changes to the main branch
-2. GitHub Actions will automatically:
-   - Build a Docker image
-   - Push the image to ECR
-   - Deploy the application on your EC2 instance
-3. Access your application at `http://<your-ec2-public-ip>:8080`
-
-## 📄 License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
+## 💻 Usage
 
 
 ```bash
 python store_index.py
 ```
-
-## 💻 Usage
 
 1. Start the Flask server
 
@@ -229,7 +145,9 @@ http://localhost:8080
 
 3. Start chatting with the HealthChat Pro AI assistant
 
+
 ## 🌐 AWS Deployment
+
 
 ### Prerequisites
 
