@@ -166,7 +166,6 @@ http://localhost:8080
 2. **Create ECR Repository**
 
    Create an Elastic Container Registry repository to store your Docker image.
-   - Note the URI: `315865595366.dkr.ecr.us-east-1.amazonaws.com/medicalbot` (replace with your actual URI)
 
 3. **Launch EC2 Instance**
 
