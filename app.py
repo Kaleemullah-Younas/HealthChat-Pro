@@ -16,7 +16,7 @@ import uuid
 
 
 app = Flask(__name__)
-app.secret_key = 'healthchat-pro-secret-key-2024'
+app.secret_key = 'healthchat-pro-secret-key-2025'
 
 # Store chat memories for each session
 chat_memories = {}
@@ -47,8 +47,8 @@ retriever = docsearch.as_retriever(search_type="similarity", search_kwargs={"k":
 
 ChatModel = ChatOpenAI(
     model="openai/gpt-oss-20b:free",
-    openai_api_key="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",
-    openai_api_base="https://openrouter.ai/api/v1",
+    openai_api_key=os.environ.get('OPENAI_API_KEY'),
+    openai_api_base=os.environ.get('OPENAI_API_BASE'),
 )
 prompt = ChatPromptTemplate.from_messages(
     [
