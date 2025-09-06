@@ -219,6 +219,4 @@ http://localhost:8080
 
 <div align="center">
 
-**HealthChat Pro** - Developed by [Kaleemullah Younas](https://github.com/Kaleemullah-Younas)
-
 </div>
